@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import yt_dlp
 import asyncio
-from config import YOUTUBE_URL, YTDLP_OPTS
+from config import YOUTUBE_URL, YTDLP_OPTS, FFMPEG_OPTIONS
 
 class VoiceCommands(commands.Cog):
     def __init__(self, bot):
@@ -66,28 +66,39 @@ class VoiceCommands(commands.Cog):
             await ctx.send(f"{member.display_name} is not in a voice channel.")
             return
 
-        if not ctx.voice_client:
-            vc = await pot_channel.connect()
-        else:
-            vc = ctx.voice_client
-            await vc.move_to(pot_channel)
+        try:
+            if not ctx.voice_client:
+                vc = await pot_channel.connect()
+            else:
+                vc = ctx.voice_client
+                await vc.move_to(pot_channel)
 
-        if vc.is_playing():
-            await ctx.send("Audio is already playing in 'the pot'.")
-            return
+            if vc.is_playing():
+                await ctx.send("Audio is already playing in 'the pot'.")
+                return
 
-        def repeat_audio(error):
-            if error:
-                print(f"Error occurred: {error}")
+            def repeat_audio(error):
+                if error:
+                    print(f"Error occurred: {error}")
+                try:
+                    with yt_dlp.YoutubeDL(YTDLP_OPTS) as ydl:
+                        info = ydl.extract_info(YOUTUBE_URL, download=False)
+                        audio_url = info['url']
+                    vc.play(discord.FFmpegPCMAudio(executable="ffmpeg", source=audio_url, **FFMPEG_OPTIONS), after=repeat_audio)
+                except Exception as e:
+                    print(f"Error in repeat_audio: {e}")
+
+            # Initial play
             with yt_dlp.YoutubeDL(YTDLP_OPTS) as ydl:
                 info = ydl.extract_info(YOUTUBE_URL, download=False)
                 audio_url = info['url']
-            vc.play(discord.FFmpegPCMAudio(audio_url), after=repeat_audio)
-
-        with yt_dlp.YoutubeDL(YTDLP_OPTS) as ydl:
-            info = ydl.extract_info(YOUTUBE_URL, download=False)
-            audio_url = info['url']
-        vc.play(discord.FFmpegPCMAudio(audio_url), after=repeat_audio)
+            
+            await ctx.send(f"Playing audio in 'the pot' for {member.display_name}")
+            vc.play(discord.FFmpegPCMAudio(executable="ffmpeg", source=audio_url, **FFMPEG_OPTIONS), after=repeat_audio)
+        
+        except Exception as e:
+            await ctx.send(f"An error occurred: {str(e)}")
+            print(f"Error in boil command: {e}")
 
 async def setup(bot):
     await bot.add_cog(VoiceCommands(bot)) 

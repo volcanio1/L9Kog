@@ -11,4 +11,10 @@ YTDLP_OPTS = {
     'no_warnings': True,
     'default_search': 'ytsearch',
     'source_address': '0.0.0.0'  
+}
+
+# FFmpeg Configuration for Replit
+FFMPEG_OPTIONS = {
+    'options': '-vn',
+    'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5'
 } 
