@@ -7,12 +7,11 @@ class EventHandlers(commands.Cog):
     
     @commands.Cog.listener()
     async def on_ready(self):
-        """Event triggered when the bot is ready"""
+
         print(f'{self.bot.user} has connected to Discord!')
     
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
-        """Handle command errors"""
         if isinstance(error, commands.CommandNotFound):
             await ctx.send(f"!boil {ctx.author.mention}")
             member = ctx.author

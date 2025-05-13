@@ -7,7 +7,6 @@ class GeneralCommands(commands.Cog):
     
     @commands.command()
     async def hi(self, ctx):
-        """Simple greeting command"""
         await ctx.send("hi")
 
 async def setup(bot):
