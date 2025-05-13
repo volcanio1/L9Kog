@@ -79,7 +79,7 @@ class VoiceCommands(commands.Cog):
 
             def repeat_audio(error):
                 if error:
-                    print(f"Error occurred: {error}")
+                    print(f"Error occurred in callback: {error}")
                 try:
                     with yt_dlp.YoutubeDL(YTDLP_OPTS) as ydl:
                         info = ydl.extract_info(YOUTUBE_URL, download=False)
